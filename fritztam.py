@@ -5,6 +5,10 @@ from xml.dom.minidom import parseString
 
 import xmltodict
 
+import typer
+
+app = typer.Typer()
+
 boxIP = "fritz.box"
 boxUser = "home-assistant"
 boxPW = "0xcafebabe"
@@ -35,10 +39,23 @@ def getSid(box, digest):
     res = requests.post(url, data=data, auth=digest, headers={'Content-Type': 'text/xml; charset="utf-8"', 'SoapAction': action})
     return parseString(res.text).getElementsByTagName('NewX_AVM-DE_UrlSID')[0].firstChild.data
 
-digest = HTTPDigestAuth(boxUser, boxPW)
-msgs = getTAM(boxIP, digest)
-sid = getSid(boxIP, digest)
-msg = getMsg(sid, msgs[0])
-file = open('message.wav', 'wb')
-file.write(msg.content)
-file.close()
+@app.command()
+def list(username: str, password: str, fritzbox_ip: str = "fritz.box"):
+    digest = HTTPDigestAuth(username, password)
+    msgs = getTAM(fritzbox_ip, digest)
+    print(msgs)
+
+@app.command()
+def get(username: str, password: str, index: int, fritzbox_ip: str = "fritz.box"):
+    digest = HTTPDigestAuth(username, password)
+    msg = getTAM(fritzbox_ip, digest)[index]
+    sid = getSid(boxIP, digest)
+    wav = getMsg(sid, msg)
+    filename = f'{msg["Date"]}: {msg["Number"]}.wav'
+    file = open(filename, 'wb')
+    file.write(wav.content)
+    file.close()
+    print(f'{filename}')
+
+if __name__ == "__main__":
+    app()
