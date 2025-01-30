@@ -1,9 +1,12 @@
-[tool.poetry]
+[project]
 name = "fritzboxtam"
 version = "0.1.0"
 description = ""
-authors = ["Your Name <you@example.com>"]
+authors = [{name = "Markus Mohnen", email = "markus.mohnen@gmail.com>"}]
 readme = "README.md"
+
+[tool.poetry.scripts]
+fritzboxtam = "fritzboxtam.cli:main"
 
 [tool.poetry.dependencies]
 python = "^3.8"
