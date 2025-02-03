@@ -1,2 +1,3 @@
-def test():
-    pass
+from . import cli
+
+listMsg = cli.listMsg
