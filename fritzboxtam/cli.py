@@ -1,3 +1,5 @@
+import os
+
 import requests
 from requests.auth import HTTPDigestAuth
 from typing import Optional
@@ -36,8 +38,7 @@ def setMark(fritzbox_ip, digest, index, mark):
     res = requests.post(url, data=data, auth=digest, headers={'Content-Type': 'text/xml; charset="utf-8"', 'SoapAction': action})
     return res
 
-
-def getMsg(fritzbox_ip, sid, msg):
+def getMsgWav(fritzbox_ip, sid, msg):
     url = f'http://{fritzbox_ip}/cgi-bin/luacgi_notimeout?{sid}&script=/lua/photo.lua&myabfile={msg["Path"].replace("/download.lua?path=","")}'
     res = requests.get(url)
     return res
@@ -63,21 +64,24 @@ def listMsg(username: str, password: str, fritzbox_ip: str = "fritz.box"):
     return msgs
 
 @main.command("list")
-def list(username: str, password: str, fritzbox_ip: str = "fritz.box"):
+def listMsgCmd(username: str, password: str, fritzbox_ip: str = "fritz.box"):
     print(listMsg(username, password, fritzbox_ip))
 
-@main.command("get")
-def getMsg(username: str, password: str, index: int, fritzbox_ip: str = "fritz.box"):
+def getMsg(username: str, password: str, index: int, fritzbox_ip: str = "fritz.box", dirname = "."):
     """Fetches a single message identified by the index in the list"""
     digest = HTTPDigestAuth(username, password)
     msg = getMsgForIndex(fritzbox_ip, digest, index)
     sid = getSid(fritzbox_ip, digest)
-    wav = getMsg(fritzbox_ip, sid, msg)
-    filename = f'{msg["Date"]} - {msg["Number"]}.wav'
+    wav = getMsgWav(fritzbox_ip, sid, msg)
+    filename = os.path.join(dirname, f'{index:02} - {msg["Date"]} - {msg["Number"]}.wav')
     file = open(filename, 'wb')
     file.write(wav.content)
     file.close()
-    print(f'{filename}')
+    return filename
+
+@main.command()
+def get(username: str, password: str, index: int, fritzbox_ip: str = "fritz.box"):
+    print(getMsg(username, password, index, fritzbox_ip, "."))
 
 @main.command()
 def mark(username: str, password: str, index: int, read: Annotated[Optional[bool], typer.Option("--read/--unread")]  = True, fritzbox_ip: str = "fritz.box"):
