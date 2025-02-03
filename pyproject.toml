@@ -12,8 +12,6 @@ fritzboxtam = "fritzboxtam.cli:main"
 python = "^3.8"
 xmltodict = "^0.14.2"
 requests = "^2.32.3"
-
-[tool.poetry.group.cli.dependencies]
 typer = "^0.15.1"
 
 [build-system]
