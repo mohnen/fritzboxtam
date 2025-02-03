@@ -56,12 +56,15 @@ def getMsgForIndex(fritzbox_ip, digest, index):
         raise typer.Exit(code=1)
     return msgs[0]
 
-@main.command("list")
 def listMsg(username: str, password: str, fritzbox_ip: str = "fritz.box"):
-    """Lists all available messages as json"""
+    """Returns all available messages as json"""
     digest = HTTPDigestAuth(username, password)
     msgs = getTAM(fritzbox_ip, digest)
-    print(msgs)
+    return msgs
+
+@main.command("list")
+def list(username: str, password: str, fritzbox_ip: str = "fritz.box"):
+    print(listMsg(username, password, fritzbox_ip))
 
 @main.command("get")
 def getMsg(username: str, password: str, index: int, fritzbox_ip: str = "fritz.box"):
