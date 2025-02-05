@@ -83,15 +83,16 @@ def getMsg(username: str, password: str, index: int, fritzbox_ip: str = "fritz.b
 def get(username: str, password: str, index: int, fritzbox_ip: str = "fritz.box"):
     print(getMsg(username, password, index, fritzbox_ip, "."))
 
-@main.command()
-def mark(username: str, password: str, index: int, read: Annotated[Optional[bool], typer.Option("--read/--unread")]  = True, fritzbox_ip: str = "fritz.box"):
-    """Marks a single message as read (default=True) or unread (False)"""
+def markMsg(username: str, password: str, index: int, read: bool=True, fritzbox_ip: str = "fritz.box"):
     digest = HTTPDigestAuth(username, password)
     msg = getMsgForIndex(fritzbox_ip, digest, index)
     newnew = 0 if read else 1
     if newnew == int(msg['New']):
-        print("No change required")
-        return
+        return "No change required"
     result = setMark(fritzbox_ip, digest, index, 1-newnew)
-    print(result.reason)
-    #print("OK" if result.ok else f"Error: {result.reason}")
+    return result.reason
+
+@main.command()
+def mark(username: str, password: str, index: int, read: Annotated[Optional[bool], typer.Option("--read/--unread")]  = True, fritzbox_ip: str = "fritz.box"):
+    """Marks a single message as read (default=True) or unread (False)"""
+    print(markMsg(username, password, index, read, fritzbox_ip))
